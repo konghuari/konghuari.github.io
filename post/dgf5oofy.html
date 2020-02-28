@@ -18,7 +18,7 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://www.konghr.cn/images/20180814203656288.png">
 <meta property="og:image" content="https://www.konghr.cn/images/5bff9535e4b04dd2799a6ae8.png">
-<meta property="og:updated_time" content="2020-02-28T09:48:05.610Z">
+<meta property="og:updated_time" content="2020-02-28T09:53:01.104Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="高并发系列之线程">
 <meta name="twitter:description" content="Java多线程之线程状态最近在看Reentrantlock底层原理的时候，了解到AQS下线程堵塞使用的是LockSupport.park()，发现这一块之前没有怎么看过，所以学习加深一下。 进去正题   -首先Thread中有几种状态，看了一下源码 123456789101112131415161718192021222324252627282930313233343536373839404142">
@@ -167,7 +167,7 @@
 <p>　　Timed Waiting:具有指定等待时间的等待线程的线程状态。</p>
 <p>下 列带超时的方式:</p>
 <p>　　Thread.sleep、0bject.wait、 Thread.join、 LockSupport.parkNanos、 LockSupport.parkUntil</p>
-<p>　　Terminated: 终止线程的线程状态。线程正常完成执行或者出现异常。<img src="../images/20180814203656288.png" alt></p>
+<p>　　Terminated: 终止线程的线程状态。线程正常完成执行或者出现异常。<img src="../images/20180814203656288.png" alt="img"></p>
 <p>上面的流程基本上大家都熟悉，那这些状态的锁的状态是什么样的？<br>先抛一下理论再讲原理。首先讲一下Thread.sleep、Object.wait、LockSupport.park 区别<br>java中有三种方法可以让线程计入休眠状态，分别是Thread.sleep()、Object.wait()、LockSupport.park()方法。</p>
 <p>##Thread.sleep()方法<br>Thread.sleep(time)方法必须传入指定的时间，线程将进入休眠状态，通过jstack输出线程快照的话此时该线程的状态应该是TIMED_WAITING，表示休眠一段时间。<br>另外，该方法会抛出InterruptedException异常，这是受检查异常，调用者必须处理。<br>通过sleep方法进入休眠的线程不会释放持有的锁，因此，在持有锁的时候调用该方法需要谨慎。</p>
 <p>##Object.wait() 方法<br>java的每个对象都隐式的继承了Object类。因此每个类都有自己的wait()方法。我们通过object.wait()方法也可以让线程进入休眠。wait()最后是调用了下面方法:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public final native void wait(long timeout) throws InterruptedException;</span><br></pre></td></tr></table></figure></p>
@@ -224,11 +224,11 @@
 </ul>
 </blockquote>
 <p> ##总结一下</p>
-<p><img src="../images/5bff9535e4b04dd2799a6ae8.png" alt="5bff9535e4b04dd2799a6ae8"></p>
+<p><img src="../images/5bff9535e4b04dd2799a6ae8.png" alt="img"></p>
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年02月28日 17:48</p>
+        <p>最后更新： 2020年02月28日 17:53</p>
         <p>原始链接： <a class="post-url" href="/post/dgf5oofy.html" title="高并发系列之线程">https://www.konghr.cn/post/dgf5oofy.html</a></p>
         <footer>
             <a href="https://www.konghr.cn">
