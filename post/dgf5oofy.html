@@ -18,7 +18,7 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://www.konghr.cn/images/20180814203656288.png">
 <meta property="og:image" content="https://www.konghr.cn/images/5bff9535e4b04dd2799a6ae8.png">
-<meta property="og:updated_time" content="2020-02-28T10:06:06.208Z">
+<meta property="og:updated_time" content="2020-02-28T10:14:20.328Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="高并发系列之线程">
 <meta name="twitter:description" content="Java多线程之线程状态最近在看Reentrantlock底层原理的时候，了解到AQS下线程堵塞使用的是LockSupport.park()，发现这一块之前没有怎么看过，所以学习加深一下。 进去正题   -首先Thread中有几种状态，看了一下源码 123456789101112131415161718192021222324252627282930313233343536373839404142">
@@ -169,7 +169,7 @@
 <p>　　Thread.sleep、0bject.wait、 Thread.join、 LockSupport.parkNanos、 LockSupport.parkUntil</p>
 <p>　　Terminated: 终止线程的线程状态。线程正常完成执行或者出现异常。<img src="../images/20180814203656288.png" alt="img"></p>
 <p>上面的流程基本上大家都熟悉，那这些状态的锁的状态是什么样的？<br>先抛一下理论再讲原理。首先讲一下Thread.sleep、Object.wait、LockSupport.park 区别<br>java中有三种方法可以让线程计入休眠状态，分别是Thread.sleep()、Object.wait()、LockSupport.park()方法。</p>
-<p>##Thread.sleep()方法<br>Thread.sleep(time)方法必须传入指定的时间，线程将进入休眠状态，通过jstack输出线程快照的话此时该线程的状态应该是TIMED_WAITING，表示休眠一段时间。<br>另外，该方法会抛出InterruptedException异常，这是受检查异常，调用者必须处理。<br>通过sleep方法进入休眠的线程不会释放持有的锁，因此，在持有锁的时候调用该方法需要谨慎。</p>
+<h3 id="Thread-sleep-方法"><a href="#Thread-sleep-方法" class="headerlink" title="Thread.sleep()方法"></a>Thread.sleep()方法</h3><p>Thread.sleep(time)方法必须传入指定的时间，线程将进入休眠状态，通过jstack输出线程快照的话此时该线程的状态应该是TIMED_WAITING，表示休眠一段时间。<br>另外，该方法会抛出InterruptedException异常，这是受检查异常，调用者必须处理。<br>通过sleep方法进入休眠的线程不会释放持有的锁，因此，在持有锁的时候调用该方法需要谨慎。</p>
 <h3 id="Object-wait-方法"><a href="#Object-wait-方法" class="headerlink" title="Object.wait() 方法"></a>Object.wait() 方法</h3><p>java的每个对象都隐式的继承了Object类。因此每个类都有自己的wait()方法。我们通过object.wait()方法也可以让线程进入休眠。wait()最后是调用了下面方法:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public final native void wait(long timeout) throws InterruptedException;</span><br></pre></td></tr></table></figure></p>
 <p>如果不传timeout，wait将会进入无限制的休眠当中，直到有人唤醒他。使用wait()让线程进入休眠的话，无论有没有传入timeout参数，线程的状态都将是WAITING状态。<br>此外，必须获得对象上的锁后，才可以执行该对象的wait方法。否则程序会在运行时抛出IllegalMonitorStateException异常。<br>再调用wait()方法后，线程进入休眠的同时，会释放持有的该对象的锁，这样其他线程就能在这期间获取到锁了。调用Object对象的notify()或者notifyAll()方法可以唤醒因为wait()而进入等待的线程。</p>
 <h3 id="LockSupport-park-方法"><a href="#LockSupport-park-方法" class="headerlink" title="LockSupport.park() 方法"></a>LockSupport.park() 方法</h3><p>通过LockSupport.park()方法，我们也可以让线程进入休眠。它的底层也是调用了Unsafe类的park方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">//Unsafe.java类</span><br><span class="line">//唤醒指定的线程</span><br><span class="line">public native void unpark(Thread jthread);</span><br><span class="line">//isAbsolute表示后面的时间是绝对时间还是相对时间，time表示时间，time=0表示无限阻塞下去</span><br><span class="line">public native void park(boolean isAbsolute, long time);</span><br></pre></td></tr></table></figure></p>
@@ -225,7 +225,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年02月28日 18:06</p>
+        <p>最后更新： 2020年02月28日 18:14</p>
         <p>原始链接： <a class="post-url" href="/post/dgf5oofy.html" title="高并发系列之线程">https://www.konghr.cn/post/dgf5oofy.html</a></p>
         <footer>
             <a href="https://www.konghr.cn">
@@ -343,12 +343,22 @@
 
     <aside class="post-toc-pos post-toc-top" id="post-toc">
         <nav class="post-toc-wrap">
-            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Java多线程之线程状态"><span class="post-toc-text">Java多线程之线程状态</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Object-wait-方法"><span class="post-toc-text">Object.wait() 方法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#LockSupport-park-方法"><span class="post-toc-text">LockSupport.park() 方法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#实现原理"><span class="post-toc-text">实现原理</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#【Object-wait-和LockSupport-park-的区别】"><span class="post-toc-text">【Object.wait()和LockSupport.park()的区别】</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#【Thread-sleep-和LockSupport-park-的区别】"><span class="post-toc-text">【Thread.sleep()和LockSupport.park()的区别】</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#总结一下"><span class="post-toc-text">总结一下</span></a></li></ol>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Java多线程之线程状态"><span class="post-toc-text">Java多线程之线程状态</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Thread-sleep-方法"><span class="post-toc-text">Thread.sleep()方法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Object-wait-方法"><span class="post-toc-text">Object.wait() 方法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#LockSupport-park-方法"><span class="post-toc-text">LockSupport.park() 方法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#实现原理"><span class="post-toc-text">实现原理</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#【Object-wait-和LockSupport-park-的区别】"><span class="post-toc-text">【Object.wait()和LockSupport.park()的区别】</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#【Thread-sleep-和LockSupport-park-的区别】"><span class="post-toc-text">【Thread.sleep()和LockSupport.park()的区别】</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#总结一下"><span class="post-toc-text">总结一下</span></a></li></ol>
         </nav>
     </aside>
     
 
 <nav id="article-nav">
+  
+    <a href="/post/dgf5o42dr.html" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          高并发系列之JVM锁
+        
+      </span>
+    </a>
   
   
     <a href="/post/4a17d151.html" id="article-nav-older" class="article-nav-link-wrap">
@@ -426,7 +436,7 @@
             <a class="category-link" href="/categories/÷JAVA高并发/">÷JAVA高并发</a><a class="category-link" href="/categories/÷管理技术团队/">÷管理技术团队</a><a class="category-link" href="/categories/面试中介绍自己的/">面试中介绍自己的</a>
         </div>
         <div id="sidebar-menu-box-tags">
-            <a href="/tags/JAVA高并发/" style="font-size: 10px;">JAVA高并发</a> <a href="/tags/管理技术团队/" style="font-size: 10px;">管理技术团队</a> <a href="/tags/面试中介绍自己的/" style="font-size: 10px;">面试中介绍自己的</a>
+            <a href="/tags/JAVA高并发/" style="font-size: 20px;">JAVA高并发</a> <a href="/tags/管理技术团队/" style="font-size: 10px;">管理技术团队</a> <a href="/tags/面试中介绍自己的/" style="font-size: 10px;">面试中介绍自己的</a>
         </div>
     </div>
     <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
@@ -465,7 +475,7 @@
     <div class="mobile-header-tag-container">
         <span class="title">Tags</span>
         <div id="mobile-header-container-tags">
-            <a href="/tags/JAVA高并发/" style="font-size: 10px;">JAVA高并发</a> <a href="/tags/管理技术团队/" style="font-size: 10px;">管理技术团队</a> <a href="/tags/面试中介绍自己的/" style="font-size: 10px;">面试中介绍自己的</a>
+            <a href="/tags/JAVA高并发/" style="font-size: 20px;">JAVA高并发</a> <a href="/tags/管理技术团队/" style="font-size: 10px;">管理技术团队</a> <a href="/tags/面试中介绍自己的/" style="font-size: 10px;">面试中介绍自己的</a>
         </div>
     </div>
 </div>

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>高并发系列之JVM锁 | 孔华日的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="孔华日的博客">
+  
+  <meta name="description" content="Java多线程之JVM锁最近好多公众号里面都在谈JVM锁，谈到锁你可能想到的是synchronized关键字，ReentrantLock这些被聊烂的东西。而这些东西底层都会用到一个CAS的东西，那我们先从CAS聊起。 首先CAS是什么？CAS是英文单词CompareAndSwap的缩写，中文意思是：比较并替换。CAS需要有3个操作数：内存地址V，旧的预期值A，即将要更新的目标值B。 CAS指令执行">
+<meta name="keywords" content="JAVA高并发">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高并发系列之JVM锁">
+<meta property="og:url" content="https://www.konghr.cn/post/dgf5o42dr.html">
+<meta property="og:site_name" content="孔华日的博客">
+<meta property="og:description" content="Java多线程之JVM锁最近好多公众号里面都在谈JVM锁，谈到锁你可能想到的是synchronized关键字，ReentrantLock这些被聊烂的东西。而这些东西底层都会用到一个CAS的东西，那我们先从CAS聊起。 首先CAS是什么？CAS是英文单词CompareAndSwap的缩写，中文意思是：比较并替换。CAS需要有3个操作数：内存地址V，旧的预期值A，即将要更新的目标值B。 CAS指令执行">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-02-29T16:03:00.841Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="高并发系列之JVM锁">
+<meta name="twitter:description" content="Java多线程之JVM锁最近好多公众号里面都在谈JVM锁，谈到锁你可能想到的是synchronized关键字，ReentrantLock这些被聊烂的东西。而这些东西底层都会用到一个CAS的东西，那我们先从CAS聊起。 首先CAS是什么？CAS是英文单词CompareAndSwap的缩写，中文意思是：比较并替换。CAS需要有3个操作数：内存地址V，旧的预期值A，即将要更新的目标值B。 CAS指令执行">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/pace.min.js"></script>
+  
+
+  
+  
+
+</head>
+</html>
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">孔华日的博客</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a href="/">
+                        <i class="fa fa-home"></i>
+                        <span>首页</span>
+                    </a>
+                    
+                    <a href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>技术随笔</span>
+                    </a>
+                    
+                    <a href="/categories">
+                        <i class="fa fa-book"></i>
+                        <span>学习目录</span>
+                    </a>
+                    
+                    <a href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>关于</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.jpg" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        孔华日的博客
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        一个专注 WEB 开发的技术博客
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="konghuari" target="_blank" href="//konghr.cn">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="github" target="_blank" href="//github.com/konghuari">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                        <a title="weibo" target="_blank" href="//weibo.com/konghuari">
+                            <i class="fa fa-weibo fa-2x"></i></a>
+                    
+                        <a title="twitter" target="_blank" href="//twitter.com/konghuari">
+                            <i class="fa fa-twitter fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-高并发之JVM锁" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      高并发系列之JVM锁
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/÷JAVA高并发/">÷JAVA高并发</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-02-28
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h3 id="Java多线程之JVM锁"><a href="#Java多线程之JVM锁" class="headerlink" title="Java多线程之JVM锁"></a>Java多线程之JVM锁</h3><p>最近好多公众号里面都在谈JVM锁，谈到锁你可能想到的是synchronized关键字，ReentrantLock这些被聊烂的东西。而这些东西底层都会用到一个CAS的东西，那我们先从CAS聊起。</p>
+<h3 id="首先CAS是什么？"><a href="#首先CAS是什么？" class="headerlink" title="首先CAS是什么？"></a>首先CAS是什么？</h3><p>CAS是英文单词CompareAndSwap的缩写，中文意思是：比较并替换。CAS需要有3个操作数：内存地址V，旧的预期值A，即将要更新的目标值B。</p>
+<p>CAS指令执行时，当且仅当内存地址V的值与预期值A相等时，将内存地址V的值修改为B，否则就什么都不做。整个比较并替换的操作是一个原子操作。</p>
+<p>Compare And Swap (Compare And Exchange) 有多种称呼   / 自旋 / 自旋锁 / 无锁<br>因为经常配合循环操作，直到完成为止，所以泛指一类操作<br>ABA问题，你的女朋友在离开你的这段儿时间经历了别的人，自旋就是你空转等待，一直等到她接纳你为止<br>解决办法（版本号 AtomicStampedReference），基础类型简单值不需要版本号</p>
+<p>下面以AtomicInteger的实现为例，分析一下CAS是如何实现的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">public final int incrementAndGet() &#123;</span><br><span class="line">   return unsafe.getAndAddInt(this, valueOffset, 1) + 1;</span><br><span class="line">&#125;</span><br><span class="line">//该方法实现的就是自增1操作，这里的this就是指我们继续跟进unsafe.getAndAddInt()方法，该方法是Unsafe类中的方法</span><br><span class="line">public final int getAndAddInt(Object obj, long offset, int delta) &#123;</span><br><span class="line">    int expect;</span><br><span class="line">    do &#123;</span><br><span class="line">    	// 取主存中变量值</span><br><span class="line">        expect= this.getIntVolatile(obj, offset); </span><br><span class="line">        // CAS操作</span><br><span class="line">    &#125; while(!this.compareAndSwapInt(obj, offset, expect, expect + delta)); </span><br><span class="line">    return expect; // 返回expect</span><br><span class="line">&#125;</span><br><span class="line">//通过这段代码发现，如果CAS操作一直不成功的话，那么该段代码就一直在自旋操作，会给CPU带来比较大的执行开销；</span><br><span class="line">//目前的CAS只能保证单个共享变量的原子操作；</span><br><span class="line">//但是对多个变量进行操作时，CAS无法保证，但是可以将多个变量封装成一个新的对象，利用AtomicReference类来保证引用对象之间的原子性；</span><br><span class="line">public final native boolean compareAndSwapInt(Object obj, long offset, int expect, int update);</span><br></pre></td></tr></table></figure></p>
+<p>正如我们看到的，我们在do-while循环里，根据obj和offset拿到主存中当前的值expect，然后执行compareAndSwapInt方法，如果expect和旧值相比较没有发生变化，compareAndSwapInt方法就会把新值expect+delta写回主存，!this.compareAndSwapInt(obj, offset, expect, expect + delta)就会返回false跳出循环。</p>
+<p>这里需要注意的是在每次比较失败之后我们的旧值是会更新成本次获取到的主存中的值的。举个例子：假设有两个线程A和B。对于A线程，开始取出主存变量0到工作区，它自增0+1之后，想把1写回主存。它先看看主存中变量还是不是0，如果是0证明B线程没有修改该变量，我就放心把1写回主存。但是如果A观察到主存中的值已经为1了，证明B线程已经对变量的值修改了，这时A把1写回去就会丢失一次加1操作。所以此刻A不把1写回主存，而是再获取主存中的值x，然后再执行一次自增1+x，自增后在看看主存中是1不？如果是1证明这次B线程总算没有在A自增时候对主存变量动手脚，所以A线程把2写回主存。</p>
+<p>总结：getAndAddInt方法中，每次在想把新值写回主存时，都通过CAS操作观察主存中当前的值判断是否修改过，如果修改过就自旋，直到有一次观察到主存中的值没有被修改，才把本次更新的值写回主存。</p>
+<p>我们RUN一下看看：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">public class TestUnsafe &#123;</span><br><span class="line"></span><br><span class="line">    int i = 0;</span><br><span class="line">    private static TestUnsafe t = new TestUnsafe();</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws Exception &#123;</span><br><span class="line">        Field unsafeField = Unsafe.class.getDeclaredFields()[0];</span><br><span class="line">        unsafeField.setAccessible(true);</span><br><span class="line">        Unsafe unsafe = (Unsafe) unsafeField.get(null);</span><br><span class="line"></span><br><span class="line">        Field f = TestUnsafe.class.getDeclaredField(&quot;i&quot;);</span><br><span class="line">        long offset = unsafe.objectFieldOffset(f);</span><br><span class="line">        System.out.println(offset);</span><br><span class="line"></span><br><span class="line">        boolean success = unsafe.compareAndSwapInt(t, offset, 0, 1);</span><br><span class="line">        System.out.println(success);</span><br><span class="line">        System.out.println(t.i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">结果</span><br><span class="line">12</span><br><span class="line">true</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+<p>那<a href="http://hg.openjdk.java.net/jdk8/jdk8/hotspot/file/tip/src/share/vm/prims/unsafe.cpp" target="_blank" rel="noopener">unsafe.cpp</a>里面是如何实现？</p>
+<p>cmpxchg = compare and exchange</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">UNSAFE_ENTRY(jboolean, Unsafe_CompareAndSwapInt(JNIEnv *env, jobject unsafe, jobject obj, jlong offset, jint e, jint x))</span><br><span class="line">  UnsafeWrapper(<span class="string">"Unsafe_CompareAndSwapInt"</span>);</span><br><span class="line">  oop p = JNIHandles::resolve(obj);</span><br><span class="line">  jint* addr = (jint *) index_oop_from_field_offset_long(p, offset);</span><br><span class="line">  <span class="keyword">return</span> (jint)(Atomic::cmpxchg(x, addr, e)) == e;<span class="comment">//cmpxchg这里实现的</span></span><br><span class="line">UNSAFE_END</span><br></pre></td></tr></table></figure>
+<p>其中的cmpxchg为核心内容. 但是这句代码根据操作系统和处理器的不同, 使用不同的底层代码. </p>
+<p>jdk8u: atomic_linux_x86.inline.hpp</p>
+<p>OpenJDK中路径如下: openjdk/hotspot/src/os_cpu/linux_x86/vm/atomic_linux_x86.inline.hpp</p>
+<h3 id="CAS核心源码"><a href="#CAS核心源码" class="headerlink" title="CAS核心源码"></a>CAS核心源码</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> jint     Atomic::cmpxchg    (jint     exchange_value, <span class="keyword">volatile</span> jint*     dest, jint     compare_value) &#123;</span><br><span class="line">  <span class="keyword">int</span> mp = os::is_MP();</span><br><span class="line">  __<span class="function">asm__ <span class="title">volatile</span> <span class="params">(LOCK_IF_MP(%<span class="number">4</span>) <span class="string">"cmpxchgl %1,(%3)"</span><span class="comment">//    LOCK_IF_MP(mp) // 如果是多处理器的话，则需要添加Lock前缀指令，Lock的方式和Volatile的实现方式雷同</span></span></span></span><br><span class="line"><span class="function"><span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">                    : <span class="string">"=a"</span> (exchange_value)</span></span></span><br><span class="line"><span class="function"><span class="params">                    : <span class="string">"r"</span> (exchange_value), <span class="string">"a"</span> (compare_value), <span class="string">"r"</span> (dest), <span class="string">"r"</span> (mp)</span></span></span><br><span class="line"><span class="function"><span class="params">                    : <span class="string">"cc"</span>, <span class="string">"memory"</span>)</span></span>;</span><br><span class="line">  <span class="keyword">return</span> exchange_value;</span><br><span class="line">&#125;</span><br><span class="line">通过上述源码可以发现该cmpxchg方法会自动判断当前是否是多处理器，多处理器的话则添加lock前缀指令，反之省略lock前缀；</span><br><span class="line"></span><br><span class="line">至于lock是怎么保证多处理器的一致性的话，原理和Volatile雷同</span><br></pre></td></tr></table></figure>
+<p>jdk8u: os.hpp is_MP()</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keyword">bool</span> <span class="title">is_MP</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">// During bootstrap if _processor_count is not yet initialized</span></span><br><span class="line">  <span class="comment">// we claim to be MP as that is safest. If any platform has a</span></span><br><span class="line">  <span class="comment">// stub generator that might be triggered in this phase and for</span></span><br><span class="line">  <span class="comment">// which being declared MP when in fact not, is a problem - then</span></span><br><span class="line">  <span class="comment">// the bootstrap routine for the stub generator needs to check</span></span><br><span class="line">  <span class="comment">// the processor count directly and leave the bootstrap routine</span></span><br><span class="line">  <span class="comment">// in place until called after initialization has ocurred.</span></span><br><span class="line">  <span class="keyword">return</span> (_processor_count != <span class="number">1</span>) || AssumeMP;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>jdk8u: atomic_linux_x86.inline.hpp</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> LOCK_IF_MP(mp) <span class="meta-string">"cmp $0, "</span> #mp <span class="meta-string">"; je 1f; lock; 1: "</span></span></span><br></pre></td></tr></table></figure>
+<p>硬件：</p>
+<p>lock指令在执行后面指令的时候锁定一个北桥信号<br>（不采用锁总线的方式）</p>
+<p>最终实现：</p>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1、CAS通过JNI方式调用底层操作系统的C代码，从而借助底层C代码来调用CPU底层操作指令来实现原子操作；</span><br><span class="line">2、CAS是硬件CPU提供的原语，通过底层cmpxchg原语指令(多处理器再加上Lock指令)实现原子操作；</span><br></pre></td></tr></table></figure>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年03月01日 00:03</p>
+        <p>原始链接： <a class="post-url" href="/post/dgf5o42dr.html" title="高并发系列之JVM锁">https://www.konghr.cn/post/dgf5o42dr.html</a></p>
+        <footer>
+            <a href="https://www.konghr.cn">
+                <img src="/images/logo.jpg" alt="khr">
+                khr
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.png" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.png">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.png">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://www.konghr.cn/post/dgf5o42dr.html&title=《高并发系列之JVM锁》 — 孔华日的博客&pic=images/39-160F2100R4.png" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://www.konghr.cn/post/dgf5o42dr.html&title=《高并发系列之JVM锁》 — 孔华日的博客&source=" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://www.konghr.cn/post/dgf5o42dr.html" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《高并发系列之JVM锁》 — 孔华日的博客&url=https://www.konghr.cn/post/dgf5o42dr.html&via=https://www.konghr.cn" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://www.konghr.cn/post/dgf5o42dr.html" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://www.konghr.cn/post/dgf5o42dr.html" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/JAVA高并发/" class="color3">JAVA高并发</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Java多线程之JVM锁"><span class="post-toc-text">Java多线程之JVM锁</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#首先CAS是什么？"><span class="post-toc-text">首先CAS是什么？</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#CAS核心源码"><span class="post-toc-text">CAS核心源码</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#原理"><span class="post-toc-text">原理</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+  
+    <a href="/post/dgf5oofy.html" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">高并发系列之线程</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="高并发之JVM锁"></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyubuOrd7';
+        var conf = 'prod_2bfaee69a443e78781a25f53c2f6a1ce';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style="display:none">
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style="display:none">
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 khr<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://www.konghr.cn",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/÷JAVA高并发/">÷JAVA高并发</a><a class="category-link" href="/categories/÷管理技术团队/">÷管理技术团队</a><a class="category-link" href="/categories/面试中介绍自己的/">面试中介绍自己的</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/JAVA高并发/" style="font-size: 20px;">JAVA高并发</a> <a href="/tags/管理技术团队/" style="font-size: 10px;">管理技术团队</a> <a href="/tags/面试中介绍自己的/" style="font-size: 10px;">面试中介绍自己的</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a href="/">
+                    <i class="fa fa-home"></i><span>首页</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="/archives">
+                    <i class="fa fa-archive"></i><span>技术随笔</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="/categories">
+                    <i class="fa fa-book"></i><span>学习目录</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="/about">
+                    <i class="fa fa-user"></i><span>关于</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/JAVA高并发/" style="font-size: 20px;">JAVA高并发</a> <a href="/tags/管理技术团队/" style="font-size: 10px;">管理技术团队</a> <a href="/tags/面试中介绍自己的/" style="font-size: 10px;">面试中介绍自己的</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+<script src="/js/search.js"></script>
+<script src="/js/main.js"></script>
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  <script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  <script src="/js/animate.js"></script>
+
+
+  <script src="/js/pop-img.js"></script>
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
