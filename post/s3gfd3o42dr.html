@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>高并发系列之JVM锁系列之Synchronized | 孔华日的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="孔华日的博客">
+  
+  <meta name="description" content="synchronized详解先自己问自己一个问题，synchronized 底层如何实现？什么是锁的升级、降级？可能你会回答，synchronized 代码块是由一对儿 monitorenter/monitorexit 指令实现的，Monitor 对象是同步的基本实现。知道这些可能还不够，我们接着看。 syncronized 是一把重量级的锁，在 Java 6 之前，Monitor 的实现完全是依">
+<meta name="keywords" content="JAVA高并发">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高并发系列之JVM锁系列之Synchronized">
+<meta property="og:url" content="https://www.konghr.cn/post/s3gfd3o42dr.html">
+<meta property="og:site_name" content="孔华日的博客">
+<meta property="og:description" content="synchronized详解先自己问自己一个问题，synchronized 底层如何实现？什么是锁的升级、降级？可能你会回答，synchronized 代码块是由一对儿 monitorenter/monitorexit 指令实现的，Monitor 对象是同步的基本实现。知道这些可能还不够，我们接着看。 syncronized 是一把重量级的锁，在 Java 6 之前，Monitor 的实现完全是依">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://www.konghr.cn/image/640.png">
+<meta property="og:image" content="https://www.konghr.cn/image/640-2.jpg">
+<meta property="og:image" content="https://www.konghr.cn/image/640-1.png">
+<meta property="og:updated_time" content="2020-03-01T10:41:02.242Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="高并发系列之JVM锁系列之Synchronized">
+<meta name="twitter:description" content="synchronized详解先自己问自己一个问题，synchronized 底层如何实现？什么是锁的升级、降级？可能你会回答，synchronized 代码块是由一对儿 monitorenter/monitorexit 指令实现的，Monitor 对象是同步的基本实现。知道这些可能还不够，我们接着看。 syncronized 是一把重量级的锁，在 Java 6 之前，Monitor 的实现完全是依">
+<meta name="twitter:image" content="https://www.konghr.cn/image/640.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/pace.min.js"></script>
+  
+
+  
+  
+
+</head>
+</html>
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">孔华日的博客</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a href="/">
+                        <i class="fa fa-home"></i>
+                        <span>首页</span>
+                    </a>
+                    
+                    <a href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>技术随笔</span>
+                    </a>
+                    
+                    <a href="/categories">
+                        <i class="fa fa-book"></i>
+                        <span>学习目录</span>
+                    </a>
+                    
+                    <a href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>关于</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.jpg" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        孔华日的博客
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        一个专注 WEB 开发的技术博客
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="konghuari" target="_blank" href="//konghr.cn">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="github" target="_blank" href="//github.com/konghuari">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                        <a title="weibo" target="_blank" href="//weibo.com/konghuari">
+                            <i class="fa fa-weibo fa-2x"></i></a>
+                    
+                        <a title="twitter" target="_blank" href="//twitter.com/konghuari">
+                            <i class="fa fa-twitter fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-高并发之JVM锁之Synchronized" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      高并发系列之JVM锁系列之Synchronized
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/÷JAVA高并发/">÷JAVA高并发</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-03-01
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h3 id="synchronized详解"><a href="#synchronized详解" class="headerlink" title="synchronized详解"></a>synchronized详解</h3><p>先自己问自己一个问题，synchronized 底层如何实现？什么是锁的升级、降级？<br>可能你会回答，synchronized 代码块是由一对儿 monitorenter/monitorexit 指令实现的，Monitor 对象是同步的基本实现。知道这些可能还不够，我们接着看。</p>
+<p>syncronized 是一把重量级的锁，在 Java 6 之前，Monitor 的实现完全是依靠操作系统内部的互斥锁，因为需要进行用户态到内核态的切换，所以同步操作是一个无差别的重量级操作。不过随着 JDK 的升级，也在对它进行不断的优化，如今它变得不那么重了，甚至在某些场景下，它的性能反而优于轻量级锁。在加了 syncronized 关键字的方法、代码块中，一次只允许一个线程进入特定代码段，从而避免多线程同时修改同一数据。</p>
+<p>说到 synchronized 加锁原理，就不得不先说 Java 对象在内存中的布局， Java 对象内存布局如下:</p>
+<p><img src="../image/640.png" alt="640"><br>如上图所示，在创建一个对象后，在 JVM 虚拟机( HotSpot )中，对象在 Java 内存中的存储布局 可分为三块:</p>
+<p>###对象头区域此处存储的信息包括两部分：</p>
+<p>1、对象自身的运行时数据( MarkWord )<br>存储 hashCode、GC 分代年龄、锁类型标记、偏向锁线程 ID 、 CAS 锁指向线程 LockRecord 的指针等， synconized 锁的机制与这个部分( markwork )密切相关，用 markword 中最低的三位代表锁的状态，其中一位是偏向锁位，另外两位是普通锁位。<br>2、对象类型指针( Class Pointer )<br>对象指向它的类元数据的指针、 JVM 就是通过它来确定是哪个 Class 的实例。</p>
+<p>###实例数据区域 </p>
+<p> 此处存储的是对象真正有效的信息，比如对象中所有字段的内容</p>
+<p>###对齐填充区域</p>
+<p> JVM 的实现 HostSpot 规定对象的起始地址必须是 8 字节的整数倍，换句话来说，现在 64 位的 OS 往外读取数据的时候一次性读取 64bit 整数倍的数据，也就是 8 个字节，所以 HotSpot 为了高效读取对象，就做了”对齐”，如果一个对象实际占的内存大小不是 8byte 的整数倍时，就”补位”到 8byte 的整数倍。所以对齐填充区域的大小不是固定的。</p>
+<p>我们代码看看对象头的内容看看。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public static void main( String[] args )</span><br><span class="line">&#123;</span><br><span class="line">    App object = new App();</span><br><span class="line">    //打印hashcode</span><br><span class="line">    System.out.println(object.hashCode());</span><br><span class="line">    //查看字节序</span><br><span class="line">    System.out.println(ByteOrder.nativeOrder());</span><br><span class="line"></span><br><span class="line">    //打印当前jvm信息</span><br><span class="line">    System.out.println(VM.current().details());</span><br><span class="line">    String classLayout = ClassLayout.parseInstance(object).toPrintable();</span><br><span class="line">    System.out.println(classLayout);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code>看看执行过程
+</code></pre> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">    com.khr.test.App object internals:</span><br><span class="line"> OFFSET  SIZE   TYPE DESCRIPTION                               VALUE</span><br><span class="line">      0     4        (object header)                           01 f1 a2 d1 (00000001 11110001 10100010 11010001) (-777850623)</span><br><span class="line">      4     4        (object header)                           3c 00 00 00 (00111100 00000000 00000000 00000000) (60)</span><br><span class="line">      8     4        (object header)                           05 c1 00 f8 (00000101 11000001 00000000 11111000) (-134168315)</span><br><span class="line">     12     4        (loss due to the next object alignment) //这里补齐的</span><br><span class="line">Instance size: 16 bytes //16个字节 这里其实有好多应用的，Dog lee 写的好多代码都用到了补齐，这个效果更高些</span><br><span class="line"> Space losses: 0 bytes internal + 4 bytes external = 4 bytes total</span><br></pre></td></tr></table></figure>
+<p>###synchronized优化的过程和markword息息相关</p>
+<p><img src="../image/640-2.jpg" alt="markword"></p>
+<p>用markword中最低的三位代表锁状态 其中1位是偏向锁位 两位是普通锁位</p>
+<p>当线程进入到 synchronized 处尝试获取该锁时， synchronized 锁升级流程如下：</p>
+<p><img src="../image/640-1.png" alt="640-1"></p>
+<p>如上图所示， synchronized 锁升级的顺序为：偏向锁-&gt;轻量级锁-&gt;重量级锁，每一步触发锁升级的情况如下：</p>
+<p><strong>偏向锁</strong></p>
+<p>在 JDK1.8 中，其实默认是轻量级锁，但如果设定了 -XX:BiasedLockingStartupDelay = 0 ，那在对一个 Object 做 syncronized 的时候，会立即上一把偏向锁。当处于偏向锁状态时， markwork 会记录当前线程 ID 。</p>
+<p><strong>升级到轻量级锁（自旋锁）</strong></p>
+<p>当下一个线程参与到偏向锁竞争时，会先判断 markword 中保存的线程 ID 是否与这个线程 ID 相等，如果不相等，会立即撤销偏向锁，升级为轻量级锁。每个线程在自己的线程栈中生成一个 LockRecord ( LR )，然后每个线程通过 CAS (自旋)的操作将锁对象头中的 markwork 设置为指向自己的 LR 的指针，哪个线程设置成功，就意味着获得锁。关于 synchronized 中此时执行的 CAS 操作是通过 native 的调用 HotSpot 中 bytecodeInterpreter.cpp 文件 C++ 代码实现的，有兴趣的可以继续深挖。</p>
+<p>补充：自适应自旋锁意味着自旋的时间（次数）不再固定，而是由前一次在同一个锁上的自旋时间及锁的拥有者的状态来决定。如果在同一个锁对象上，自旋等待刚刚成功获得过锁，并且持有锁的线程正在运行中，那么虚拟机就会认为这次自旋也是很有可能再次成功，进而它将允许自旋等待持续相对更长的时间。如果对于某个锁，自旋很少成功获得过，那在以后尝试获取这个锁时将可能省略掉自旋过程，直接阻塞线程，避免浪费处理器资源。</p>
+<p><strong>升级到重量级锁</strong></p>
+<p>如果锁竞争加剧(如线程自旋次数或者自旋的线程数超过某阈值， JDK1.6 之后，由 JVM 自己控制该规则)，就会升级为重量级锁。此时就会向操作系统申请资源，线程挂起，进入到操作系统内核态的等待队列中，等待操作系统调度，然后映射回用户态。在重量级锁中，由于需要做内核态到用户态的转换，而这个过程中需要消耗较多时间，也就是”重”的原因之一。</p>
+<p>补充：自旋超过10次，升级为重量级锁 - 如果太多线程自旋 CPU消耗过大，不如升级为重量级锁，进入等待队列（不消耗CPU）-XX:PreBlockSpin</p>
+<p>自旋锁在 JDK1.4.2 中引入，使用 -XX:+UseSpinning 来开启。JDK 6 中变为默认开启，并且引入了自适应的自旋锁（适应性自旋锁）。</p>
+<p>自适应自旋锁意味着自旋的时间（次数）不再固定，而是由前一次在同一个锁上的自旋时间及锁的拥有者的状态来决定。如果在同一个锁对象上，自旋等待刚刚成功获得过锁，并且持有锁的线程正在运行中，那么虚拟机就会认为这次自旋也是很有可能再次成功，进而它将允许自旋等待持续相对更长的时间。如果对于某个锁，自旋很少成功获得过，那在以后尝试获取这个锁时将可能省略掉自旋过程，直接阻塞线程，避免浪费处理器资源。</p>
+<p><strong>可重入</strong></p>
+<p>synchronized 拥有强制原子性的内部锁机制，是一把可重入锁。因此，在一个线程使用 synchronized 方法时调用该对象另一个 synchronized 方法，即一个线程得到一个对象锁后再次请求该对象锁，是永远可以拿到锁的。在 Java 中线程获得对象锁的操作是以线程为单位的，而不是以调用为单位的。 synchronized 锁的对象头的 markwork 中会记录该锁的线程持有者和计数器，当一个线程请求成功后， JVM 会记下持有锁的线程，并将计数器计为1。此时其他线程请求该锁，则必须等待。而该持有锁的线程如果再次请求这个锁，就可以再次拿到这个锁，同时计数器会递增。当线程退出一个 synchronized 方法/块时，计数器会递减，如果计数器为 0 则释放该锁锁。</p>
+<p><strong>悲观锁(互斥锁、排他锁)</strong></p>
+<p> synchronized 是一把悲观锁(独占锁)，当前线程如果获取到锁，会导致其它所有需要锁该的线程等待，一直等待持有锁的线程释放锁才继续进行锁的争抢。</p>
+<p>偏向锁由于有锁撤销的过程revoke，会消耗系统资源，所以，在锁争用特别激烈的时候，用偏向锁未必效率高。还不如直接使用轻量级锁。</p>
+<h2 id="synchronized最底层实现"><a href="#synchronized最底层实现" class="headerlink" title="synchronized最底层实现"></a>synchronized最底层实现</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">T</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">volatile</span> <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">n</span><span class="params">()</span> </span>&#123; i++; &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">m</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function">publics <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> j=<span class="number">0</span>; j&lt;<span class="number">1000_000</span>; j++) &#123;</span><br><span class="line">            m();</span><br><span class="line">            n();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>java -XX:+UnlockDiagonositicVMOptions -XX:+PrintAssembly T</p>
+<p>C1 Compile Level 1 (一级优化)</p>
+<p>C2 Compile Level 2 (二级优化)</p>
+<p>找到m() n()方法的汇编码，会看到 lock comxchg …..指令</p>
+<h2 id="synchronized-vs-Lock-CAS"><a href="#synchronized-vs-Lock-CAS" class="headerlink" title="synchronized vs Lock (CAS)"></a>synchronized vs Lock (CAS)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">在高争用 高耗时的环境下synchronized效率更高</span><br><span class="line">在低争用 低耗时的环境下CAS效率更高</span><br><span class="line">synchronized到重量级之后是等待队列（不消耗CPU）</span><br><span class="line">CAS（等待期间消耗CPU）</span><br><span class="line"></span><br><span class="line">一切以实测为准</span><br></pre></td></tr></table></figure>
+<h1 id="锁消除-lock-eliminate"><a href="#锁消除-lock-eliminate" class="headerlink" title="锁消除 lock eliminate"></a>锁消除 lock eliminate</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">add</span><span class="params">(String str1,String str2)</span></span>&#123;</span><br><span class="line">         StringBuffer sb = <span class="keyword">new</span> StringBuffer();</span><br><span class="line">         sb.append(str1).append(str2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们都知道 StringBuffer 是线程安全的，因为它的关键方法都是被 synchronized 修饰过的，但我们看上面这段代码，我们会发现，sb 这个引用只会在 add 方法中使用，不可能被其它线程引用（因为是局部变量，栈私有），因此 sb 是不可能共享的资源，JVM 会自动消除 StringBuffer 对象内部的锁。</p>
+<h1 id="锁粗化-lock-coarsening"><a href="#锁粗化-lock-coarsening" class="headerlink" title="锁粗化 lock coarsening"></a>锁粗化 lock coarsening</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">test</span><span class="params">(String str)</span></span>&#123;</span><br><span class="line">       </span><br><span class="line">       <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">       StringBuffer sb = <span class="keyword">new</span> StringBuffer():</span><br><span class="line">       <span class="keyword">while</span>(i &lt; <span class="number">100</span>)&#123;</span><br><span class="line">           sb.append(str);</span><br><span class="line">           i++;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">return</span> sb.toString():</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>JVM 会检测到这样一连串的操作都对同一个对象加锁（while 循环内 100 次执行 append，没有锁粗化的就要进行 100  次加锁/解锁），此时 JVM 就会将加锁的范围粗化到这一连串的操作的外部（比如 while 虚幻体外），使得这一连串操作只需要加一次锁即可。</p>
+<h1 id="锁降级（不重要）"><a href="#锁降级（不重要）" class="headerlink" title="锁降级（不重要）"></a>锁降级（不重要）</h1><p><a href="https://www.zhihu.com/question/63859501" target="_blank" rel="noopener">https://www.zhihu.com/question/63859501</a></p>
+<p>其实，只被VMThread访问，降级也就没啥意义了。所以可以简单认为锁降级不存在！</p>
+<h1 id="超线程"><a href="#超线程" class="headerlink" title="超线程"></a>超线程</h1><p>一个ALU + 两组Registers + PC</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="http://openjdk.java.net/groups/hotspot/docs/HotSpotGlossary.html" target="_blank" rel="noopener">http://openjdk.java.net/groups/hotspot/docs/HotSpotGlossary.html</a></p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年03月01日 18:41</p>
+        <p>原始链接： <a class="post-url" href="/post/s3gfd3o42dr.html" title="高并发系列之JVM锁系列之Synchronized">https://www.konghr.cn/post/s3gfd3o42dr.html</a></p>
+        <footer>
+            <a href="https://www.konghr.cn">
+                <img src="/images/logo.jpg" alt="khr">
+                khr
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.png" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.png">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.png">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://www.konghr.cn/post/s3gfd3o42dr.html&title=《高并发系列之JVM锁系列之Synchronized》 — 孔华日的博客&pic=images/39-160F2100R4.png" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://www.konghr.cn/post/s3gfd3o42dr.html&title=《高并发系列之JVM锁系列之Synchronized》 — 孔华日的博客&source=" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://www.konghr.cn/post/s3gfd3o42dr.html" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《高并发系列之JVM锁系列之Synchronized》 — 孔华日的博客&url=https://www.konghr.cn/post/s3gfd3o42dr.html&via=https://www.konghr.cn" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://www.konghr.cn/post/s3gfd3o42dr.html" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://www.konghr.cn/post/s3gfd3o42dr.html" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/JAVA高并发/" class="color3">JAVA高并发</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#synchronized详解"><span class="post-toc-text">synchronized详解</span></a></li></ol><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#synchronized最底层实现"><span class="post-toc-text">synchronized最底层实现</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#synchronized-vs-Lock-CAS"><span class="post-toc-text">synchronized vs Lock (CAS)</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#锁消除-lock-eliminate"><span class="post-toc-text">锁消除 lock eliminate</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#锁粗化-lock-coarsening"><span class="post-toc-text">锁粗化 lock coarsening</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#锁降级（不重要）"><span class="post-toc-text">锁降级（不重要）</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#超线程"><span class="post-toc-text">超线程</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#参考资料"><span class="post-toc-text">参考资料</span></a>
+        </li></nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+  
+    <a href="/post/dgf5o42dr.html" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">高并发系列之JVM锁系列之CAS</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="高并发之JVM锁之Synchronized"></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyubuOrd7';
+        var conf = 'prod_2bfaee69a443e78781a25f53c2f6a1ce';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style="display:none">
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style="display:none">
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 khr<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://www.konghr.cn",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/÷JAVA高并发/">÷JAVA高并发</a><a class="category-link" href="/categories/÷管理技术团队/">÷管理技术团队</a><a class="category-link" href="/categories/面试中介绍自己的/">面试中介绍自己的</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/JAVA高并发/" style="font-size: 20px;">JAVA高并发</a> <a href="/tags/管理技术团队/" style="font-size: 10px;">管理技术团队</a> <a href="/tags/面试中介绍自己的/" style="font-size: 10px;">面试中介绍自己的</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a href="/">
+                    <i class="fa fa-home"></i><span>首页</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="/archives">
+                    <i class="fa fa-archive"></i><span>技术随笔</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="/categories">
+                    <i class="fa fa-book"></i><span>学习目录</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="/about">
+                    <i class="fa fa-user"></i><span>关于</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/JAVA高并发/" style="font-size: 20px;">JAVA高并发</a> <a href="/tags/管理技术团队/" style="font-size: 10px;">管理技术团队</a> <a href="/tags/面试中介绍自己的/" style="font-size: 10px;">面试中介绍自己的</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+<script src="/js/search.js"></script>
+<script src="/js/main.js"></script>
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  <script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  <script src="/js/animate.js"></script>
+
+
+  <script src="/js/pop-img.js"></script>
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

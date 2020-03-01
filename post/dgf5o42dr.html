@@ -3,7 +3,7 @@
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="utf-8">
   
-  <title>高并发系列之JVM锁 | 孔华日的博客</title>
+  <title>高并发系列之JVM锁系列之CAS | 孔华日的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
     <meta name="keywords" content="孔华日的博客">
@@ -11,14 +11,14 @@
   <meta name="description" content="Java多线程之JVM锁最近好多公众号里面都在谈JVM锁，谈到锁你可能想到的是synchronized关键字，ReentrantLock这些被聊烂的东西。而这些东西底层都会用到一个CAS的东西，那我们先从CAS聊起。 首先CAS是什么？CAS是英文单词CompareAndSwap的缩写，中文意思是：比较并替换。CAS需要有3个操作数：内存地址V，旧的预期值A，即将要更新的目标值B。 CAS指令执行">
 <meta name="keywords" content="JAVA高并发">
 <meta property="og:type" content="article">
-<meta property="og:title" content="高并发系列之JVM锁">
+<meta property="og:title" content="高并发系列之JVM锁系列之CAS">
 <meta property="og:url" content="https://www.konghr.cn/post/dgf5o42dr.html">
 <meta property="og:site_name" content="孔华日的博客">
 <meta property="og:description" content="Java多线程之JVM锁最近好多公众号里面都在谈JVM锁，谈到锁你可能想到的是synchronized关键字，ReentrantLock这些被聊烂的东西。而这些东西底层都会用到一个CAS的东西，那我们先从CAS聊起。 首先CAS是什么？CAS是英文单词CompareAndSwap的缩写，中文意思是：比较并替换。CAS需要有3个操作数：内存地址V，旧的预期值A，即将要更新的目标值B。 CAS指令执行">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-02-29T16:03:00.841Z">
+<meta property="og:updated_time" content="2020-03-01T07:18:12.720Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="高并发系列之JVM锁">
+<meta name="twitter:title" content="高并发系列之JVM锁系列之CAS">
 <meta name="twitter:description" content="Java多线程之JVM锁最近好多公众号里面都在谈JVM锁，谈到锁你可能想到的是synchronized关键字，ReentrantLock这些被聊烂的东西。而这些东西底层都会用到一个CAS的东西，那我们先从CAS聊起。 首先CAS是什么？CAS是英文单词CompareAndSwap的缩写，中文意思是：比较并替换。CAS需要有3个操作数：内存地址V，旧的预期值A，即将要更新的目标值B。 CAS指令执行">
   
   
@@ -115,14 +115,14 @@
     </div>
 </header>
       <div class="outer">
-        <section id="main" class="body-wrap"><article id="post-高并发之JVM锁" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main" class="body-wrap"><article id="post-高并发之JVM锁之CAS" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="post-title" itemprop="name">
-      高并发系列之JVM锁
+      高并发系列之JVM锁系列之CAS
     </h1>
     <div class="post-title-bar">
       <ul>
@@ -175,12 +175,12 @@
 <p>硬件：</p>
 <p>lock指令在执行后面指令的时候锁定一个北桥信号<br>（不采用锁总线的方式）</p>
 <p>最终实现：</p>
-<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1、CAS通过JNI方式调用底层操作系统的C代码，从而借助底层C代码来调用CPU底层操作指令来实现原子操作；</span><br><span class="line">2、CAS是硬件CPU提供的原语，通过底层cmpxchg原语指令(多处理器再加上Lock指令)实现原子操作；</span><br></pre></td></tr></table></figure>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CAS通过JNI方式调用底层操作系统的C代码，从而借助底层C代码来调用CPU底层操作指令来实现原子操作；</span><br><span class="line">CAS是硬件CPU提供的原语，通过底层cmpxchg原语指令(多处理器再加上Lock指令)实现原子操作；</span><br></pre></td></tr></table></figure>
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年03月01日 00:03</p>
-        <p>原始链接： <a class="post-url" href="/post/dgf5o42dr.html" title="高并发系列之JVM锁">https://www.konghr.cn/post/dgf5o42dr.html</a></p>
+        <p>最后更新： 2020年03月01日 15:18</p>
+        <p>原始链接： <a class="post-url" href="/post/dgf5o42dr.html" title="高并发系列之JVM锁系列之CAS">https://www.konghr.cn/post/dgf5o42dr.html</a></p>
         <footer>
             <a href="https://www.konghr.cn">
                 <img src="/images/logo.jpg" alt="khr">
@@ -237,7 +237,7 @@
     <div class="post-share-list" id="share-list">
         <ul class="share-icons">
           <li>
-            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://www.konghr.cn/post/dgf5o42dr.html&title=《高并发系列之JVM锁》 — 孔华日的博客&pic=images/39-160F2100R4.png" data-title="微博">
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://www.konghr.cn/post/dgf5o42dr.html&title=《高并发系列之JVM锁系列之CAS》 — 孔华日的博客&pic=images/39-160F2100R4.png" data-title="微博">
               <i class="fa fa-weibo"></i>
             </a>
           </li>
@@ -247,7 +247,7 @@
             </a>
           </li>
           <li>
-            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://www.konghr.cn/post/dgf5o42dr.html&title=《高并发系列之JVM锁》 — 孔华日的博客&source=" data-title="QQ">
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://www.konghr.cn/post/dgf5o42dr.html&title=《高并发系列之JVM锁系列之CAS》 — 孔华日的博客&source=" data-title="QQ">
               <i class="fa fa-qq"></i>
             </a>
           </li>
@@ -257,7 +257,7 @@
             </a>
           </li>
           <li>
-            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《高并发系列之JVM锁》 — 孔华日的博客&url=https://www.konghr.cn/post/dgf5o42dr.html&via=https://www.konghr.cn" data-title="Twitter">
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《高并发系列之JVM锁系列之CAS》 — 孔华日的博客&url=https://www.konghr.cn/post/dgf5o42dr.html&via=https://www.konghr.cn" data-title="Twitter">
               <i class="fa fa-twitter"></i>
             </a>
           </li>
@@ -304,6 +304,16 @@
 
 <nav id="article-nav">
   
+    <a href="/post/s3gfd3o42dr.html" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          高并发系列之JVM锁系列之Synchronized
+        
+      </span>
+    </a>
+  
   
     <a href="/post/dgf5oofy.html" id="article-nav-older" class="article-nav-link-wrap">
       <span class="article-nav-title">高并发系列之线程</span>
@@ -315,7 +325,7 @@
 
 
     
-        <div id="SOHUCS" sid="高并发之JVM锁"></div>
+        <div id="SOHUCS" sid="高并发之JVM锁之CAS"></div>
 <script type="text/javascript">
     (function(){
         var appid = 'cyubuOrd7';
