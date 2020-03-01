@@ -16,14 +16,14 @@
 <meta property="og:site_name" content="孔华日的博客">
 <meta property="og:description" content="synchronized详解先自己问自己一个问题，synchronized 底层如何实现？什么是锁的升级、降级？可能你会回答，synchronized 代码块是由一对儿 monitorenter/monitorexit 指令实现的，Monitor 对象是同步的基本实现。知道这些可能还不够，我们接着看。 syncronized 是一把重量级的锁，在 Java 6 之前，Monitor 的实现完全是依">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://www.konghr.cn/image/640.png">
-<meta property="og:image" content="https://www.konghr.cn/image/640-2.jpg">
-<meta property="og:image" content="https://www.konghr.cn/image/640-1.png">
-<meta property="og:updated_time" content="2020-03-01T10:41:02.242Z">
+<meta property="og:image" content="https://www.konghr.cn/images/640.png">
+<meta property="og:image" content="https://www.konghr.cn/images/640-2.jpg">
+<meta property="og:image" content="https://www.konghr.cn/images/640-1.png">
+<meta property="og:updated_time" content="2020-03-01T10:43:56.328Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="高并发系列之JVM锁系列之Synchronized">
 <meta name="twitter:description" content="synchronized详解先自己问自己一个问题，synchronized 底层如何实现？什么是锁的升级、降级？可能你会回答，synchronized 代码块是由一对儿 monitorenter/monitorexit 指令实现的，Monitor 对象是同步的基本实现。知道这些可能还不够，我们接着看。 syncronized 是一把重量级的锁，在 Java 6 之前，Monitor 的实现完全是依">
-<meta name="twitter:image" content="https://www.konghr.cn/image/640.png">
+<meta name="twitter:image" content="https://www.konghr.cn/images/640.png">
   
   
     <link rel="icon" href="/favicon.ico">
@@ -158,7 +158,7 @@
             <h3 id="synchronized详解"><a href="#synchronized详解" class="headerlink" title="synchronized详解"></a>synchronized详解</h3><p>先自己问自己一个问题，synchronized 底层如何实现？什么是锁的升级、降级？<br>可能你会回答，synchronized 代码块是由一对儿 monitorenter/monitorexit 指令实现的，Monitor 对象是同步的基本实现。知道这些可能还不够，我们接着看。</p>
 <p>syncronized 是一把重量级的锁，在 Java 6 之前，Monitor 的实现完全是依靠操作系统内部的互斥锁，因为需要进行用户态到内核态的切换，所以同步操作是一个无差别的重量级操作。不过随着 JDK 的升级，也在对它进行不断的优化，如今它变得不那么重了，甚至在某些场景下，它的性能反而优于轻量级锁。在加了 syncronized 关键字的方法、代码块中，一次只允许一个线程进入特定代码段，从而避免多线程同时修改同一数据。</p>
 <p>说到 synchronized 加锁原理，就不得不先说 Java 对象在内存中的布局， Java 对象内存布局如下:</p>
-<p><img src="../image/640.png" alt="640"><br>如上图所示，在创建一个对象后，在 JVM 虚拟机( HotSpot )中，对象在 Java 内存中的存储布局 可分为三块:</p>
+<p><img src="../images/640.png" alt="640"><br>如上图所示，在创建一个对象后，在 JVM 虚拟机( HotSpot )中，对象在 Java 内存中的存储布局 可分为三块:</p>
 <p>###对象头区域此处存储的信息包括两部分：</p>
 <p>1、对象自身的运行时数据( MarkWord )<br>存储 hashCode、GC 分代年龄、锁类型标记、偏向锁线程 ID 、 CAS 锁指向线程 LockRecord 的指针等， synconized 锁的机制与这个部分( markwork )密切相关，用 markword 中最低的三位代表锁的状态，其中一位是偏向锁位，另外两位是普通锁位。<br>2、对象类型指针( Class Pointer )<br>对象指向它的类元数据的指针、 JVM 就是通过它来确定是哪个 Class 的实例。</p>
 <p>###实例数据区域 </p>
@@ -170,10 +170,10 @@
 <pre><code>看看执行过程
 </code></pre> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">    com.khr.test.App object internals:</span><br><span class="line"> OFFSET  SIZE   TYPE DESCRIPTION                               VALUE</span><br><span class="line">      0     4        (object header)                           01 f1 a2 d1 (00000001 11110001 10100010 11010001) (-777850623)</span><br><span class="line">      4     4        (object header)                           3c 00 00 00 (00111100 00000000 00000000 00000000) (60)</span><br><span class="line">      8     4        (object header)                           05 c1 00 f8 (00000101 11000001 00000000 11111000) (-134168315)</span><br><span class="line">     12     4        (loss due to the next object alignment) //这里补齐的</span><br><span class="line">Instance size: 16 bytes //16个字节 这里其实有好多应用的，Dog lee 写的好多代码都用到了补齐，这个效果更高些</span><br><span class="line"> Space losses: 0 bytes internal + 4 bytes external = 4 bytes total</span><br></pre></td></tr></table></figure>
 <p>###synchronized优化的过程和markword息息相关</p>
-<p><img src="../image/640-2.jpg" alt="markword"></p>
+<p><img src="../images/640-2.jpg" alt="markword"></p>
 <p>用markword中最低的三位代表锁状态 其中1位是偏向锁位 两位是普通锁位</p>
 <p>当线程进入到 synchronized 处尝试获取该锁时， synchronized 锁升级流程如下：</p>
-<p><img src="../image/640-1.png" alt="640-1"></p>
+<p><img src="../images/640-1.png" alt="640-1"></p>
 <p>如上图所示， synchronized 锁升级的顺序为：偏向锁-&gt;轻量级锁-&gt;重量级锁，每一步触发锁升级的情况如下：</p>
 <p><strong>偏向锁</strong></p>
 <p>在 JDK1.8 中，其实默认是轻量级锁，但如果设定了 -XX:BiasedLockingStartupDelay = 0 ，那在对一个 Object 做 syncronized 的时候，会立即上一把偏向锁。当处于偏向锁状态时， markwork 会记录当前线程 ID 。</p>
@@ -207,7 +207,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年03月01日 18:41</p>
+        <p>最后更新： 2020年03月01日 18:43</p>
         <p>原始链接： <a class="post-url" href="/post/s3gfd3o42dr.html" title="高并发系列之JVM锁系列之Synchronized">https://www.konghr.cn/post/s3gfd3o42dr.html</a></p>
         <footer>
             <a href="https://www.konghr.cn">
