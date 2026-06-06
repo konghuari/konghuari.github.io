@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="关于 — helios" active="about">
+  <section>
+    <div class="container">
+      <h1 class="section-title">关于我</h1>
+      <p class="section-sub">一些关于我自己的事。</p>
+
+      <div class="about">
+        <div class="about-photo">M</div>
+        <div class="about-content">
+          <h2>mac</h2>
+          <p>
+            写代码、折腾东西、偶尔写点东西。
+            主要做 <code>Web</code> 和 <code>AI</code> 相关的工作。
+          </p>
+          <p>
+            喜欢用 Markdown 记笔记，用终端写代码，用各种奇怪的小工具解决日常问题。
+            业余时间会看看论文、做做 side project。
+          </p>
+          <p>
+            这个网站是占位内容 ——
+            以后我会用 <code>markdown</code> 写真正的"我"。
+          </p>
+
+          <h3 style="margin-top: 2rem; margin-bottom: 0.5rem;">联系方式</h3>
+          <div class="contact-links">
+            <a href="https://github.com/mac" target="_blank">GitHub</a>
+            <a href="mailto:hi@example.com">Email</a>
+            <a href="https://x.com/mac" target="_blank">X / Twitter</a>
+            <a href="/rss.xml">RSS</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

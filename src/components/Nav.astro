@@ -1,0 +1,20 @@
+---
+interface Props { active?: 'home' | 'projects' | 'blog' | 'about'; }
+const { active } = Astro.props;
+const links = [
+  { href: '/', label: '首页', key: 'home' },
+  { href: '/projects', label: '项目', key: 'projects' },
+  { href: '/blog', label: '博客', key: 'blog' },
+  { href: '/about', label: '关于', key: 'about' },
+];
+---
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">helios.dev</a>
+    <div class="nav-links">
+      {links.map(l => (
+        <a href={l.href} class={active === l.key ? 'active' : ''}>{l.label}</a>
+      ))}
+    </div>
+  </div>
+</nav>

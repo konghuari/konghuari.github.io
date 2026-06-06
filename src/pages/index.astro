@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const projects = (await getCollection('projects')).slice(0, 3);
+const posts = (await getCollection('blog'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 4);
+---
+<BaseLayout title="helios — 个人站" active="home">
+  <section class="hero">
+    <div class="container">
+      <span class="hero-tag">👋 你好，我是 helios</span>
+      <h1>做点有意思的<br /><span class="gradient">代码、笔记、折腾。</span></h1>
+      <p>这是我的个人主页 —— 放我做过的项目、写过的博客、以及一些关于我的事情。</p>
+      <div class="hero-cta">
+        <a href="/projects" class="btn btn-primary">看项目 →</a>
+        <a href="/blog" class="btn btn-outline">读博客</a>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2 class="section-title">最近项目</h2>
+      <p class="section-sub">最近在做的一些小玩意儿。</p>
+      <div class="grid">
+        {projects.map(p => (
+          <a href={`/projects/${p.slug}`} class="card">
+            <h3>{p.data.title}</h3>
+            <p>{p.data.description}</p>
+            <div class="tags">
+              {p.data.tags.map(t => <span class="tag">{t}</span>)}
+            </div>
+            <div class="links">
+              {p.data.github && <span>GitHub →</span>}
+              {p.data.demo && <span>Demo →</span>}
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2 class="section-title">最近文章</h2>
+      <p class="section-sub">我在想的一些事。</p>
+      <div class="post-list">
+        {posts.map(post => (
+          <a href={`/blog/${post.slug}`} class="post-item">
+            <span class="post-item-title">{post.data.title}</span>
+            <span class="post-item-date">
+              {post.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

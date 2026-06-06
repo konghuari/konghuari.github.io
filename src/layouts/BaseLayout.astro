@@ -1,0 +1,36 @@
+---
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  active?: 'home' | 'projects' | 'blog' | 'about';
+}
+const {
+  title = 'helios — 个人站',
+  description = 'helios 的个人主页：项目、博客、关于我。',
+  active = 'home',
+} = Astro.props;
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <Nav active={active} />
+    <main>
+      <slot />
+    </main>
+    <footer>
+      <div class="container">
+        <p>© 2026 helios · Built with Astro · <a href="/rss.xml">RSS</a></p>
+      </div>
+    </footer>
+  </body>
+</html>

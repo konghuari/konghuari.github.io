@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+<BaseLayout title="博客 — helios" active="blog">
+  <section>
+    <div class="container">
+      <h1 class="section-title">博客</h1>
+      <p class="section-sub">我写过的东西。Markdown 直接写，看这里 → <a href="https://github.com/mac/personal-site/tree/main/src/content/blog" style="color: var(--accent-2)">源码</a>。</p>
+      <div class="post-list">
+        {posts.map(post => (
+          <a href={`/blog/${post.slug}`} class="post-item">
+            <span class="post-item-title">{post.data.title}</span>
+            <span class="post-item-date">
+              {post.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

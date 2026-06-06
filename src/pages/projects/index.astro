@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const projects = await getCollection('projects');
+---
+<BaseLayout title="项目 — helios" active="projects">
+  <section>
+    <div class="container">
+      <h1 class="section-title">项目</h1>
+      <p class="section-sub">我做过的、正在做的、或者想做但没动手的事。</p>
+      <div class="grid">
+        {projects.map(p => (
+          <a href={`/projects/${p.slug}`} class="card">
+            <h3>{p.data.title}</h3>
+            <p>{p.data.description}</p>
+            <div class="tags">
+              {p.data.tags.map(t => <span class="tag">{t}</span>)}
+            </div>
+            <div class="links">
+              {p.data.github && <span>→ GitHub</span>}
+              {p.data.demo && <span>→ Demo</span>}
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
