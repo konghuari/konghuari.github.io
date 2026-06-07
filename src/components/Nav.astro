@@ -1,10 +1,11 @@
 ---
-interface Props { active?: 'home' | 'projects' | 'blog' | 'about'; }
+interface Props { active?: 'home' | 'projects' | 'blog' | 'stocks' | 'about'; }
 const { active } = Astro.props;
 const links = [
   { href: '/', label: '首页', key: 'home' },
   { href: '/projects', label: '项目', key: 'projects' },
   { href: '/blog', label: '博客', key: 'blog' },
+  { href: '/stocks', label: '股票分析', key: 'stocks' },
   { href: '/about', label: '关于', key: 'about' },
 ];
 ---

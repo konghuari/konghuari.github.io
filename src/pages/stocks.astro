@@ -1,0 +1,73 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const watchItems = [
+  { name: '观察清单', note: '记录值得长期跟踪的公司、指数和行业主题。' },
+  { name: '估值笔记', note: '整理收入、利润、现金流、估值区间和关键假设。' },
+  { name: '财报复盘', note: '按季度更新业务变化、风险暴露和管理层表述。' },
+];
+
+const frameworks = [
+  '公司做什么，收入从哪里来',
+  '行业空间、竞争格局和护城河',
+  '增长质量、利润质量和现金流',
+  '估值假设、催化因素和下行风险',
+];
+---
+<BaseLayout
+  title="股票分析 — helios"
+  description="helios 的股票分析与投资研究笔记。"
+  active="stocks"
+>
+  <section class="page-hero">
+    <div class="container">
+      <span class="hero-tag">Markets · Notes · Research</span>
+      <h1>股票分析</h1>
+      <p>把个股、行业和财报拆成可复盘的研究记录，少一点情绪，多一点证据。</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2 class="section-title">研究入口</h2>
+      <p class="section-sub">先搭框架，再填数据。这里会慢慢沉淀观察清单、财报笔记和估值记录。</p>
+      <div class="grid">
+        {watchItems.map(item => (
+          <article class="card">
+            <h3>{item.name}</h3>
+            <p>{item.note}</p>
+            <div class="links"><span>即将更新 →</span></div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2 class="section-title">分析框架</h2>
+      <p class="section-sub">每篇分析尽量回答这些问题，并把关键数据来源留在文中。</p>
+      <div class="stock-framework">
+        {frameworks.map((item, index) => (
+          <div class="framework-row">
+            <span class="framework-index">{String(index + 1).padStart(2, '0')}</span>
+            <p>{item}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2 class="section-title">记录模板</h2>
+      <p class="section-sub">后续个股文章可以按这个结构写，方便比较和复盘。</p>
+      <div class="note-template">
+        <p><strong>结论：</strong>暂不写结论，先列出需要验证的假设。</p>
+        <p><strong>证据：</strong>财报、公告、电话会、行业数据、竞品变化。</p>
+        <p><strong>风险：</strong>估值过高、增长放缓、监管变化、竞争加剧。</p>
+        <p><strong>跟踪：</strong>下次更新要看的指标和触发条件。</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
