@@ -9,7 +9,7 @@ const posts = (await getCollection('blog'))
   <section>
     <div class="container">
       <h1 class="section-title">博客</h1>
-      <p class="section-sub">我写过的东西。Markdown 直接写，看这里 → <a href="https://github.com/mac/personal-site/tree/main/src/content/blog" style="color: var(--accent-2)">源码</a>。</p>
+      <p class="section-sub">我写过的东西。Markdown 直接写，看这里 → <a href="https://github.com/konghuari/konghuari.github.io/tree/master/src/content/blog" style="color: var(--accent-2)">源码</a>。</p>
       <div class="post-list">
         {posts.map(post => (
           <a href={`/blog/${post.slug}`} class="post-item">

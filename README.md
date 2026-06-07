@@ -20,6 +20,6 @@ npm run preview  # 本地预览 build 结果
 
 ## 部署
 
-推到 main 分支自动触发 `.github/workflows/deploy.yml`，build 后部署到 GitHub Pages。
+推到 master 分支自动触发 `.github/workflows/deploy.yml`，build 后部署到 GitHub Pages。
 
 首次部署需要在 GitHub 仓库 Settings → Pages → Source 选 "GitHub Actions"。
