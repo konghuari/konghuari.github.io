@@ -1,0 +1,39 @@
+name: Setup GitHub Pages
+on:
+  push:
+    branches: [setup-pages]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Pages config (custom domain + build type)
+        run: |
+          echo "=== Setting Pages config ==="
+          resp=$(curl -s -o /dev/null -w "%%{http_code}" -X PUT \
+            "https://api.github.com/repos/konghuari/konghuari.github.io/pages" \
+            -H "Authorization: bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            -d '{"cname":"www.aibotworld.cn","build_type":"workflow"}')
+          echo "HTTP response: $resp"
+          if [ "$resp" = "204" ] || [ "$resp" = "200" ]; then
+            echo "### Success! Pages config updated ###"
+          else
+            echo "### Failed - checking current config... ###"
+            curl -s "https://api.github.com/repos/konghuari/konghuari.github.io/pages" \
+              -H "Authorization: bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github+json"
+          fi
+
+      - name: Verify result
+        run: |
+          echo "=== Verification ==="
+          curl -s "https://api.github.com/repos/konghuari/konghuari.github.io/pages" \
+            -H "Authorization: bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json"
