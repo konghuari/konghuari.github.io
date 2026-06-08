@@ -2,30 +2,30 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const aShareRows = [
-  { rank: 1, name: '招商银行', code: 'sh600036', close: '38.58', change: '+1.26%', state: '强势延续', trigger: '站稳 38.7 附近' },
-  { rank: 2, name: '中国移动', code: 'sh600941', close: '97.33', change: '-0.64%', state: '趋势偏稳', trigger: '重新站上 97.6-98.0' },
-  { rank: 3, name: '美的集团', code: 'sz000333', close: '81.69', change: '-0.89%', state: '中性偏强', trigger: '收回 82.2' },
-  { rank: 4, name: '迈瑞医疗', code: 'sz300760', close: '144.39', change: '+1.26%', state: '弱修复', trigger: '站回 145.6' },
-  { rank: 5, name: '贵州茅台', code: 'sh600519', close: '1272.86', change: '+0.38%', state: '弱修复', trigger: '收复 1288-1290' },
-  { rank: 6, name: '海尔智家', code: 'sh600690', close: '20.31', change: '-0.25%', state: '偏弱', trigger: '收复 20.7' },
-  { rank: 7, name: '比亚迪', code: 'sz002594', close: '93.01', change: '-0.46%', state: '偏弱', trigger: '收复 94.3-95.2' },
-  { rank: 8, name: '宁德时代', code: 'sz300750', close: '403.00', change: '-1.27%', state: '最弱', trigger: '收复 408-415' },
+  { rank: 1, name: '美的集团', code: 'sz000333', close: '82.85', change: '+1.42%', state: '相对最强', trigger: '守住 82.4，放量上攻 83.7' },
+  { rank: 2, name: '招商银行', code: 'sh600036', close: '38.50', change: '-0.21%', state: '强势整理', trigger: '重新站稳 38.7' },
+  { rank: 3, name: '中国移动', code: 'sh600941', close: '96.60', change: '-0.75%', state: '趋势转弱边缘', trigger: '收回 97.6' },
+  { rank: 4, name: '海尔智家', code: 'sh600690', close: '20.17', change: '-0.69%', state: '弱势整理', trigger: '收复 20.5' },
+  { rank: 5, name: '迈瑞医疗', code: 'sz300760', close: '142.74', change: '-1.14%', state: '弱修复失败', trigger: '收复 144.3-145.0' },
+  { rank: 6, name: '贵州茅台', code: 'sh600519', close: '1262.98', change: '-0.78%', state: '继续偏弱', trigger: '收复 1278-1288' },
+  { rank: 7, name: '比亚迪', code: 'sz002594', close: '91.19', change: '-1.96%', state: '破位偏弱', trigger: '收复 93.8-94.7' },
+  { rank: 8, name: '宁德时代', code: 'sz300750', close: '393.02', change: '-2.48%', state: '最弱', trigger: '收复 403-413' },
 ];
 
 const usRows = [
-  { rank: 1, name: '苹果', code: 'usAAPL', close: '307.34', change: '-1.25%', state: '相对最稳', trigger: '维持 307-310 区间' },
-  { rank: 2, name: '谷歌-A', code: 'usGOOGL', close: '368.53', change: '-0.59%', state: '短线修复', trigger: '重新站上 372' },
-  { rank: 3, name: 'Meta', code: 'usMETA', close: '593.00', change: '-4.90%', state: '大阴后观察', trigger: '收回 608-617' },
-  { rank: 4, name: '英伟达', code: 'usNVDA', close: '205.10', change: '-6.20%', state: '转弱', trigger: '收回 215-217' },
-  { rank: 5, name: '微软', code: 'usMSFT', close: '416.67', change: '-2.75%', state: '跌破短均', trigger: '收回 422-430' },
-  { rank: 6, name: '亚马逊', code: 'usAMZN', close: '246.03', change: '-3.05%', state: '偏弱', trigger: '收回 253-254' },
-  { rank: 7, name: '特斯拉', code: 'usTSLA', close: '391.00', change: '-6.56%', state: '最弱', trigger: '收回 414-425' },
+  { rank: 1, name: '苹果', code: 'usAAPL', close: '313.71', change: '+2.17%', state: '相对最强', trigger: '守住 311.5，冲击 315' },
+  { rank: 2, name: '特斯拉', code: 'usTSLA', close: '404.97', change: '+3.57%', state: '弱势反弹', trigger: '收复 412-423' },
+  { rank: 3, name: '英伟达', code: 'usNVDA', close: '208.76', change: '+1.78%', state: '弱反弹', trigger: '收复 214-215' },
+  { rank: 4, name: '亚马逊', code: 'usAMZN', close: '246.43', change: '+0.16%', state: '低位横盘', trigger: '收复 250.5' },
+  { rank: 5, name: '谷歌-A', code: 'usGOOGL', close: '362.11', change: '-1.77%', state: '偏弱', trigger: '收复 364.7-374.8' },
+  { rank: 6, name: '微软', code: 'usMSFT', close: '410.62', change: '-1.45%', state: '继续转弱', trigger: '收复 422-425' },
+  { rank: 7, name: 'Meta', code: 'usMETA', close: '587.95', change: '-0.51%', state: '大阴后低位', trigger: '收复 605-615' },
 ];
 
 const dataCommands = [
   'westock-data kline ... --period day --limit 12',
   'westock-data technical ... --group ma,macd,rsi,kdj',
-  'westock-data asfund ... --date 2026-06-05',
+  'westock-data asfund ...',
 ];
 ---
 <BaseLayout
@@ -44,17 +44,17 @@ const dataCommands = [
   <section>
     <div class="container">
       <h2 class="section-title">最新短期观察</h2>
-      <p class="section-sub">数据基准：A 股 2026-06-05 收盘；美股 2026-06-05 收盘。周一使用时以开盘后的量价确认触发条件。</p>
+      <p class="section-sub">数据基准：A 股 2026-06-08 收盘；美股 2026-06-08 收盘。下一交易日使用时以开盘后的量价确认触发条件。</p>
       <div class="market-summary">
         <article>
           <span>A 股</span>
-          <strong>招商银行、中国移动、美的集团相对靠前</strong>
-          <p>优先看强势延续，不追跌破短均线后的弱反弹。</p>
+          <strong>美的集团最强，招商银行维持强势整理</strong>
+          <p>中国移动跌回短均线附近；宁德时代、比亚迪继续偏弱。</p>
         </article>
         <article>
           <span>美股</span>
-          <strong>大型科技股整体转弱，先看修复</strong>
-          <p>苹果和谷歌相对稳，英伟达、特斯拉需先收复短期均线。</p>
+          <strong>苹果相对最强，科技股多数仍在修复</strong>
+          <p>特斯拉、英伟达属于弱势反弹，需先收复短期均线。</p>
         </article>
       </div>
     </div>
