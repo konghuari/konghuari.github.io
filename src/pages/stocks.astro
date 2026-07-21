@@ -2,28 +2,28 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const aShareRows = [
-  { rank: 1, name: '贵州茅台', code: 'sh600519', close: '1327.50', change: '+5.95%', state: '放量突破', trigger: '守住 1261.1，突破 1329' },
-  { rank: 2, name: '迈瑞医疗', code: 'sz300760', close: '154.50', change: '+3.39%', state: '强势突破', trigger: '守住 148.0，突破 155' },
-  { rank: 3, name: '招商银行', code: 'sh600036', close: '38.91', change: '+2.34%', state: '放量突破', trigger: '守住 37.9，突破 38.91' },
-  { rank: 4, name: '中国移动', code: 'sh600941', close: '95.80', change: '+2.57%', state: '放量延续', trigger: '守住 93.4，突破 96.1' },
-  { rank: 5, name: '海尔智家', code: 'sh600690', close: '21.46', change: '+2.43%', state: '趋势延续', trigger: '守住 21.0，突破 21.5' },
-  { rank: 6, name: '宁德时代', code: 'sz300750', close: '376.43', change: '+4.56%', state: '修复加速', trigger: '收复 376.7-380.0' },
-  { rank: 7, name: '美的集团', code: 'sz000333', close: '84.30', change: '+1.92%', state: '强势延续', trigger: '守住 82.5，突破 84.5' },
-  { rank: 8, name: '比亚迪', code: 'sz002594', close: '93.92', change: '+0.48%', state: '缩量整理', trigger: '守住 92.7，突破 96.0' },
+  { rank: 1, name: '宁德时代', code: 'sz300750', close: '382.20', change: '+1.53%', state: '资金转强', trigger: '守住 371.6，突破 391.0' },
+  { rank: 2, name: '海尔智家', code: 'sh600690', close: '21.85', change: '+1.82%', state: '放量延续', trigger: '守住 21.3，突破 22.3' },
+  { rank: 3, name: '比亚迪', code: 'sz002594', close: '94.30', change: '+0.40%', state: '强势整理', trigger: '守住 93.5，突破 96.8' },
+  { rank: 4, name: '贵州茅台', code: 'sh600519', close: '1308.00', change: '-1.47%', state: '突破后回踩', trigger: '守住 1279.7，收复 1344.7' },
+  { rank: 5, name: '美的集团', code: 'sz000333', close: '84.27', change: '-0.04%', state: '高位整理', trigger: '守住 83.2，突破 85.8' },
+  { rank: 6, name: '迈瑞医疗', code: 'sz300760', close: '152.25', change: '-1.46%', state: '强势回踩', trigger: '守住 150.5，突破 156.0' },
+  { rank: 7, name: '中国移动', code: 'sh600941', close: '94.94', change: '-0.90%', state: '放量回踩', trigger: '守住 94.0，突破 96.5' },
+  { rank: 8, name: '招商银行', code: 'sh600036', close: '37.99', change: '-2.36%', state: '跌破 5 日线', trigger: '收复 38.1-39.4' },
 ];
 
 const usRows = [
-  { rank: 1, name: '苹果', code: 'usAAPL', close: '333.74', change: '+0.14%', state: '放量强势', trigger: '守住 325.3，突破 335.0' },
-  { rank: 2, name: '微软', code: 'usMSFT', close: '393.82', change: '-1.82%', state: '强势回踩', trigger: '守住 393.3，突破 406.0' },
-  { rank: 3, name: '亚马逊', code: 'usAMZN', close: '247.23', change: '-1.06%', state: '均线边缘', trigger: '收复 249.4-258.1' },
-  { rank: 4, name: 'Meta', code: 'usMETA', close: '646.01', change: '-2.79%', state: '跌破 5 日线', trigger: '收复 661.9-686.1' },
-  { rank: 5, name: '英伟达', code: 'usNVDA', close: '202.81', change: '-2.21%', state: '跌破短均', trigger: '收复 204.8-207.6' },
-  { rank: 6, name: '标普500ETF', code: 'usSPY', close: '743.29', change: '-0.99%', state: '跌破均线', trigger: '收复 745.0-750.1' },
-  { rank: 7, name: '纳指100ETF', code: 'usQQQ', close: '695.33', change: '-1.50%', state: '放量转弱', trigger: '收复 710.1-714.3' },
-  { rank: 8, name: '谷歌-A', code: 'usGOOGL', close: '346.77', change: '-2.17%', state: '继续偏弱', trigger: '收复 355.9-359.6' },
-  { rank: 9, name: '博通', code: 'usAVGO', close: '370.83', change: '-0.97%', state: '跌破均线', trigger: '收复 381.8-384.7' },
-  { rank: 10, name: '特斯拉', code: 'usTSLA', close: '380.84', change: '-2.61%', state: '弱势下行', trigger: '收复 391.5-398.8' },
-  { rank: 11, name: 'AMD', code: 'usAMD', close: '495.76', change: '-1.03%', state: '最弱', trigger: '收复 521.7-533.0' },
+  { rank: 1, name: '微软', code: 'usMSFT', close: '402.29', change: '+2.15%', state: '修复最强', trigger: '守住 395.6，突破 406.0' },
+  { rank: 2, name: '亚马逊', code: 'usAMZN', close: '249.99', change: '+1.12%', state: '收复均线', trigger: '守住 249.9，突破 258.1' },
+  { rank: 3, name: '苹果', code: 'usAAPL', close: '326.59', change: '-2.14%', state: '跌破 5 日线', trigger: '收复 327.2-335.0' },
+  { rank: 4, name: '英伟达', code: 'usNVDA', close: '203.28', change: '+0.23%', state: '弱修复', trigger: '收复 205.6-207.6' },
+  { rank: 5, name: 'Meta', code: 'usMETA', close: '645.85', change: '-0.02%', state: '弱势整理', trigger: '收复 647.5-659.8' },
+  { rank: 6, name: '博通', code: 'usAVGO', close: '378.16', change: '+1.98%', state: '反弹未确认', trigger: '收复 380.2-385.1' },
+  { rank: 7, name: '谷歌-A', code: 'usGOOGL', close: '351.99', change: '+1.51%', state: '弱修复', trigger: '收复 355.1-358.1' },
+  { rank: 8, name: '标普500ETF', code: 'usSPY', close: '742.09', change: '-0.16%', state: '均线下方', trigger: '收复 744.8-749.2' },
+  { rank: 9, name: '纳指100ETF', code: 'usQQQ', close: '696.06', change: '+0.10%', state: '低位横盘', trigger: '收复 707.0-711.6' },
+  { rank: 10, name: 'AMD', code: 'usAMD', close: '503.57', change: '+1.58%', state: '弱反弹', trigger: '收复 515.5-531.3' },
+  { rank: 11, name: '特斯拉', code: 'usTSLA', close: '369.57', change: '-2.96%', state: '最弱', trigger: '收复 386.4-396.3' },
 ];
 
 const dataCommands = [
@@ -48,17 +48,17 @@ const dataCommands = [
   <section>
     <div class="container">
       <h2 class="section-title">最新短期观察</h2>
-      <p class="section-sub">数据基准：A 股 2026-07-20 收盘；美股 2026-07-17 收盘。下一交易日使用时以开盘后的量价确认触发条件。</p>
+      <p class="section-sub">数据基准：A 股 2026-07-21 收盘；美股 2026-07-20 收盘。下一交易日使用时以开盘后的量价确认触发条件。</p>
       <div class="market-summary">
         <article>
           <span>A 股</span>
-          <strong>贵州茅台、迈瑞医疗、招商银行放量突破</strong>
-          <p>A 股观察清单全部站在 5/10 日线上方；宁德时代接近收复 20 日线。</p>
+          <strong>宁德时代、海尔智家、比亚迪切到前排</strong>
+          <p>宁德时代收复 5/10/20 日线且资金转强；招商银行跌破 5 日线。</p>
         </article>
         <article>
           <span>美股</span>
-          <strong>苹果独强，美股科技线多数转弱</strong>
-          <p>QQQ、SPY 均跌破 5/10/20 日线；英伟达、Meta 跌破 5 日线，AMD 最弱。</p>
+          <strong>微软、亚马逊相对修复，美股整体仍弱</strong>
+          <p>QQQ、SPY 仍在均线下方；特斯拉继续最弱，英伟达只是弱修复。</p>
         </article>
       </div>
     </div>
