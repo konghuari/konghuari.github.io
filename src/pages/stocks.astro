@@ -2,28 +2,28 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const aShareRows = [
-  { rank: 1, name: '宁德时代', code: 'sz300750', close: '400.00', change: '+4.44%', state: '放量突破', trigger: '守住 384.7，突破 403.8' },
-  { rank: 2, name: '海尔智家', code: 'sh600690', close: '21.87', change: '+0.51%', state: '高位延续', trigger: '守住 21.9，突破 22.0' },
-  { rank: 3, name: '招商银行', code: 'sh600036', close: '39.00', change: '-0.51%', state: '强势整理', trigger: '守住 38.8，突破 39.4' },
-  { rank: 4, name: '贵州茅台', code: 'sh600519', close: '1289.50', change: '-0.61%', state: '跌破 5 日线', trigger: '收复 1298.4-1344.7' },
-  { rank: 5, name: '中国移动', code: 'sh600941', close: '94.39', change: '-0.32%', state: '均线边缘', trigger: '收复 94.5-96.5' },
-  { rank: 6, name: '美的集团', code: 'sz000333', close: '84.13', change: '-0.44%', state: '高位整理', trigger: '收复 84.5-85.8' },
-  { rank: 7, name: '比亚迪', code: 'sz002594', close: '92.40', change: '+0.55%', state: '弱修复', trigger: '收复 92.6-93.2' },
-  { rank: 8, name: '迈瑞医疗', code: 'sz300760', close: '148.56', change: '+1.49%', state: '跌破短均', trigger: '收复 149.1-150.1' },
+  { rank: 1, name: '招商银行', code: 'sh600036', close: '39.59', change: 'K线缺口', state: '资金转强', trigger: '守住 39.1，突破 39.6' },
+  { rank: 2, name: '贵州茅台', code: 'sh600519', close: '1320.00', change: 'K线缺口', state: '重回强势', trigger: '守住 1300.8，突破 1320' },
+  { rank: 3, name: '比亚迪', code: 'sz002594', close: '93.35', change: 'K线缺口', state: '收复均线', trigger: '守住 92.9，突破 93.4' },
+  { rank: 4, name: '海尔智家', code: 'sh600690', close: '22.40', change: 'K线缺口', state: '高位延续', trigger: '守住 22.0，突破 22.4' },
+  { rank: 5, name: '美的集团', code: 'sz000333', close: '85.37', change: 'K线缺口', state: '趋势延续', trigger: '守住 84.7，突破 85.4' },
+  { rank: 6, name: '中国移动', code: 'sh600941', close: '96.35', change: 'K线缺口', state: '趋势延续', trigger: '守住 94.8，突破 96.4' },
+  { rank: 7, name: '迈瑞医疗', code: 'sz300760', close: '150.54', change: 'K线缺口', state: '均线修复', trigger: '守住 150.1，突破 150.5' },
+  { rank: 8, name: '宁德时代', code: 'sz300750', close: '390.86', change: 'K线缺口', state: '强势整理', trigger: '守住 386.4，突破 390.9' },
 ];
 
 const usRows = [
-  { rank: 1, name: '苹果', code: 'usAAPL', close: '333.02', change: 'K线缺口', state: '相对最强', trigger: '守住 328.3，突破 333.0' },
-  { rank: 2, name: '英伟达', code: 'usNVDA', close: '206.84', change: 'K线缺口', state: '均线边缘', trigger: '收复 208.0-208.4' },
-  { rank: 3, name: '微软', code: 'usMSFT', close: '381.70', change: 'K线缺口', state: '跌破均线', trigger: '收复 386.6-391.1' },
-  { rank: 4, name: '博通', code: 'usAVGO', close: '381.92', change: 'K线缺口', state: '均线下方', trigger: '收复 382.3-387.9' },
-  { rank: 5, name: 'AMD', code: 'usAMD', close: '521.95', change: 'K线缺口', state: '回落整理', trigger: '收复 525.8-536.1' },
-  { rank: 6, name: '标普500ETF', code: 'usSPY', close: '738.93', change: 'K线缺口', state: '继续偏弱', trigger: '收复 742.4-746.7' },
-  { rank: 7, name: '纳指100ETF', code: 'usQQQ', close: '684.23', change: 'K线缺口', state: '最弱指数', trigger: '收复 695.0-700.9' },
-  { rank: 8, name: 'Meta', code: 'usMETA', close: '595.19', change: 'K线缺口', state: '跌破均线', trigger: '收复 613.5-636.6' },
-  { rank: 9, name: '亚马逊', code: 'usAMZN', close: '232.11', change: 'K线缺口', state: '继续偏弱', trigger: '收复 238.1-244.0' },
-  { rank: 10, name: '谷歌-A', code: 'usGOOGL', close: '319.74', change: 'K线缺口', state: '低位弱势', trigger: '收复 329.3-343.0' },
-  { rank: 11, name: '特斯拉', code: 'usTSLA', close: '313.03', change: 'K线缺口', state: '最弱', trigger: '收复 339.7-363.1' },
+  { rank: 1, name: '苹果', code: 'usAAPL', close: '336.91', change: 'K线缺口', state: '相对最强', trigger: '守住 329.0，突破 336.9' },
+  { rank: 2, name: '微软', code: 'usMSFT', close: '389.10', change: 'K线缺口', state: '弱修复', trigger: '收复 391.8' },
+  { rank: 3, name: '博通', code: 'usAVGO', close: '383.22', change: 'K线缺口', state: '均线边缘', trigger: '收复 384.8-388.2' },
+  { rank: 4, name: '标普500ETF', code: 'usSPY', close: '739.09', change: 'K线缺口', state: '继续偏弱', trigger: '收复 742.4-746.7' },
+  { rank: 5, name: 'AMD', code: 'usAMD', close: '494.95', change: 'K线缺口', state: '回落偏弱', trigger: '收复 523.1-530.7' },
+  { rank: 6, name: '谷歌-A', code: 'usGOOGL', close: '326.56', change: 'K线缺口', state: '低位修复', trigger: '收复 330.7-343.7' },
+  { rank: 7, name: '英伟达', code: 'usNVDA', close: '196.51', change: 'K线缺口', state: '跌破均线', trigger: '收复 203.5-206.9' },
+  { rank: 8, name: '纳指100ETF', code: 'usQQQ', close: '682.12', change: 'K线缺口', state: '指数弱势', trigger: '收复 694.5-700.7' },
+  { rank: 9, name: 'Meta', code: 'usMETA', close: '593.87', change: 'K线缺口', state: '继续偏弱', trigger: '收复 613.2-636.5' },
+  { rank: 10, name: '亚马逊', code: 'usAMZN', close: '231.39', change: 'K线缺口', state: '继续偏弱', trigger: '收复 237.9-243.9' },
+  { rank: 11, name: '特斯拉', code: 'usTSLA', close: '309.22', change: 'K线缺口', state: '最弱', trigger: '收复 339.0-362.7' },
 ];
 
 const dataCommands = [
@@ -48,17 +48,17 @@ const dataCommands = [
   <section>
     <div class="container">
       <h2 class="section-title">最新短期观察</h2>
-      <p class="section-sub">数据基准：A 股 2026-07-27 收盘；美股 technical 返回 2026-07-27。美股 K 线接口今日缺口，暂只用均线和指标观察。</p>
+      <p class="section-sub">数据基准：A 股 2026-07-28 收盘；美股 technical 返回 2026-07-28。K 线接口今日缺口，暂只用均线、指标和 A 股资金流观察。</p>
       <div class="market-summary">
         <article>
           <span>A 股</span>
-          <strong>宁德时代放量突破，海尔智家和招商银行靠前</strong>
-          <p>宁德时代站上 5/10/20 日线且主力净流入；茅台、中国移动、美的跌回 5 日线附近。</p>
+          <strong>招商银行、贵州茅台、比亚迪资金转强</strong>
+          <p>A 股观察清单全部站上 5/10/20 日线；招商银行、茅台、比亚迪主力净流入。</p>
         </article>
         <article>
           <span>美股</span>
-          <strong>苹果相对最强，多数美股仍在均线下方</strong>
-          <p>NVDA 卡在 5/10 日线附近；QQQ、SPY、Meta、特斯拉均低于 5/10/20 日线。</p>
+          <strong>苹果继续最强，美股多数仍低于短均线</strong>
+          <p>微软弱修复；NVDA、QQQ、Meta、亚马逊、特斯拉仍在 5/10/20 日线下方。</p>
         </article>
       </div>
     </div>
